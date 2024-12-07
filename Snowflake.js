@@ -21,7 +21,7 @@ function Snowflake( x, y, r ){
     }else {
       this.color = random(190,200);
       this.dir = random( -0.25 , 0 );
-    }
+    } 
 
     this.show = function(){
       push();
