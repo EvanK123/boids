@@ -1,20 +1,26 @@
-//json
+//  json
 var sprite_json
-var x = 0;
-var y = 0;
-//imgs
+
+//  imgs
 var bg_img;
-//song
+//  song
 var song;
-//text bar
+//  text bar
 var text_bar;
 var currentCharacter = 0;
+
+
 var TenderBud;
-var TenderBod;
 var flock = [];
-//preload json and image
 var animations = {}
-var numBoids = 4;
+var num_boids = 7;
+
+//  snowman 
+var num_snowmen = 3
+var snow_people = [];
+//  snowflake
+var num_snowflakes = 1000;
+var snowflakes = [];
 
 function preload(){
   bg_img = loadImage("/images/snow-bg.jpg")
@@ -23,16 +29,41 @@ function preload(){
 }
 
 function setup() {
-  frameRate(30);
-  x = windowWidth/2;
-  y = windowHeight /2
+  frameRate(23);
+  let x = windowWidth/2;
+  let y = windowHeight /2
 
   createCanvas(windowWidth, windowHeight );
   loadAnimations()
   text_bar = new textBar();
   TenderBud = new Sprite( sprite_json , x , y , "TenderBud" )
-  for(let i = 0; i < numBoids; i++){
+  for(let i = 0; i < num_boids; i++){
     flock.push( new Boid( sprite_json ,random(0,windowWidth) , random(0,windowHeight) , "TenderBud"))
+
+  }
+  //  snowmen
+  for(let i = 0; i < num_snowmen; i++){
+    let x = random(0,windowWidth)
+    let y;
+    let roll = random(0,1)
+    if(roll < .25){
+      y = random(0,windowHeight *.25)
+    }else if(roll<.5){
+      y = random(windowHeight *.25,windowHeight*.5)
+    }else if(roll<.75){
+      y = random(windowHeight*.5,windowHeight*.75)
+    }else{
+      y = random(windowHeight*.75,windowHeight)
+    }
+    snow_people.push(new SnowMan(x,y))
+  }
+
+  //  snowflakes
+  for(let i = 0; i < num_snowflakes; i++){
+    let x = random(0,windowWidth) 
+    let y = random(-windowHeight,windowHeight)
+    let r = random(3,6)
+    snowflakes[i] = new Snowflake( x , y , r );
   }
 
 }
@@ -42,18 +73,29 @@ function draw() {
   background(bg_img); 
   TenderBud.show()
   
-
   //BOID TIME
   for (let boid of flock) {
+    //  this is cursed they get stuck vvvvvv we should have the snow_people 
+    //  like animated being crushed or something
+    //  boid.checkCollisionWithSnowman(snow_people)
     boid.edges(); 
     boid.flock(flock); 
     boid.update();         
     boid.show();      
   }
+  for(let snowman of snow_people){
+    snowman.show()
+  }
+  for(let snowflake of snowflakes){
+    snowflake.show()
+    snowflake.fall()
+  }
+
+  
   // text bar
-  text_bar.show()
+  //text_bar.show()
   //  write the current animation in the text bar
-  text_bar.animateText(TenderBud.cur_action);
+  //text_bar.animateText(TenderBud.cur_action);
 }
 function loadAnimations() {
   //  only tenderbud in this assignment

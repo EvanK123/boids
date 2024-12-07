@@ -8,9 +8,6 @@ class Boid {
     this.maxForce = 0.2;
     this.maxSpeed = 5;
 
-    //
-    
-
     // Sprite properties
     this.sprite_data = sprite_data[sprite_name];
     this.sprite_name = sprite_name;
@@ -20,6 +17,8 @@ class Boid {
     this.scale = 0.5;
     this.pathToAnimation = "/Penguins/" + sprite_name + "/";
     this.moving = false;
+    this.width;
+    this.height;
 
     // Preload sprite images
     this.preloadImages();
@@ -37,15 +36,47 @@ class Boid {
     }
   }
 
+  // Update animation based on movement direction
+  updateDirection() {
+    let direction = this.velocity.copy();
+    if (direction.mag() > 0) {
+      if (abs(direction.x) > abs(direction.y)) {
+        // Horizontal movement
+        if (direction.x > 0) {
+          this.changeAction("walk_E"); // Move right
+        } else {
+          this.changeAction("walk_W"); // Move left
+        }
+      } else {
+        // Vertical movement
+        if (direction.y > 0) {
+          this.changeAction("walk_S"); // Move down
+        } else {
+          this.changeAction("walk_N"); // Move up
+        }
+      }
+    } else {
+      this.changeAction("idle"); // Stop animation if not moving
+    }
+  }
+
+  // Change animation action
+  changeAction(next) {
+    if (this.cur_action !== next) {
+      this.cur_action = next;
+      this.cur_frame = 0;
+      resetCurrentCharacter(); // Update text bar if needed
+      text_bar.changeText(next); // Update animation text
+    }
+  }
+
   // Display the current frame
   show() {
-    // Render sprite
-    push()
+    push();
     imageMode(CENTER);
     let frames = this.animations[this.cur_action];
     if (frames && frames.length > 0) {
       let currentImage = frames[this.cur_frame % frames.length];
-      
       image(
         currentImage,
         this.position.x,
@@ -54,13 +85,16 @@ class Boid {
         currentImage.height * this.scale
       );
       this.cur_frame++;
-    }
 
-    // Visualize boid (optional)
+      //  will be used for borderzz
+      this.width = currentImage.width * this.scale
+      this.height = currentImage.height * this.scale
+    }
     strokeWeight(6);
     stroke(255);
     point(this.position.x, this.position.y);
     pop();
+    
   }
 
   // Update position and velocity
@@ -69,6 +103,7 @@ class Boid {
     this.velocity.add(this.acceleration);
     this.velocity.limit(this.maxSpeed);
     this.acceleration.mult(0);
+    this.updateDirection(); // Update animation based on direction
   }
 
   // Keep the boid within screen bounds
@@ -154,12 +189,24 @@ class Boid {
     let cohesion = this.cohesion(boids);
     let separation = this.separation(boids);
 
-    alignment.mult(.5);
-    cohesion.mult(.5);
+    alignment.mult(0.5);
+    cohesion.mult(0.5);
     separation.mult(1.5);
 
     this.acceleration.add(alignment);
     this.acceleration.add(cohesion);
     this.acceleration.add(separation);
   }
+
+
+  // avoid_player(TenderBud){
+  //   let min_distance = this.width + (this.width /2)
+  //   let cur_distance = dist(this.position.x,this.position.y, TenderBud.x,TenderBud.y)
+
+  //   if(cur_distance <= min_distance){
+
+  //   }
+  // }
+
+  
 }

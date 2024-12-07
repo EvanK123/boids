@@ -1,7 +1,6 @@
 class Sprite {
   constructor(sprite_data, x, y, sprite_name) {
-    this.x = x;
-    this.y = y;
+    this.position = createVector(x, y);
     this.sprite_name = sprite_name;
     this.animations = {};
     this.cur_frame = 0;
@@ -37,20 +36,20 @@ class Sprite {
     let frames = this.animations[this.cur_action];
     if (frames && frames.length > 0) {
       let currentImage = frames[this.cur_frame % frames.length];
-      image(currentImage, this.x, this.y, currentImage.width * this.scale, currentImage.height * this.scale);
+      image(currentImage, this.position.x, this.position.y, currentImage.width * this.scale, currentImage.height * this.scale);
       this.cur_frame++;
     }
   }
   //  keypress
   move( dx, dy){
-    this.x += dx 
-    this.y += dy 
-    console.log(this.x)
-    console.log(this.y)
-    this.x = constrain(this.x, 0, width - this.getWidth());
-    this.y = constrain(this.y, 0, height - this.getHeight());
-    console.log(this.x);
-    console.log(this.y);
+    this.position.x += dx 
+    this.position.y += dy 
+    console.log(this.position.x)
+    console.log(this.position.y)
+    this.position.x = constrain(this.position.x, 0, width - this.getWidth());
+    this.position.y = constrain(this.position.y, 0, height - this.getHeight());
+    console.log(this.position.x);
+    console.log(this.position.y);
   }
   // Update the animation based on movement direction
   updateDirection(direction) {
@@ -106,23 +105,23 @@ class Sprite {
   moveToClick() {
     //  thank god for physics 2
     if (this.target) {
-      let direction = createVector(this.target.x - this.x, this.target.y - this.y);
+      let direction = createVector(this.target.x - this.position.x, this.target.y - this.position.y);
       let distance = direction.mag();
       
       if (distance > this.speed) {
         direction.normalize();
         // Calculate the new position
-        let newX = this.x + direction.x * this.speed;
-        let newY = this.y + direction.y * this.speed;
+        let newX = this.position.x + direction.x * this.speed;
+        let newY = this.position.y + direction.y * this.speed;
         //  check if we are in bounds
-        this.x = constrain(newX, 0, width - this.getWidth());
-        this.y = constrain(newY, 0, height - this.getHeight());
+        this.position.x = constrain(newX, 0, width - this.getWidth());
+        this.position.y = constrain(newY, 0, height - this.getHeight());
         // set dir
         this.updateDirection(direction);
       } else {
         // reset to idle when reaching the target
-        this.x = constrain(this.target.x, 0, width - this.getWidth());
-        this.y = constrain(this.target.y, 0, height - this.getHeight());
+        this.position.x = constrain(this.target.x, 0, width - this.getWidth());
+        this.position.y = constrain(this.target.y, 0, height - this.getHeight());
         this.moving = false;
         this.changeAction('idle');
       }
