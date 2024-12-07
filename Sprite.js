@@ -28,17 +28,28 @@ class Sprite {
 
   // Display the current frame of the current action
   show() {
+    push()
+
     // If moving, update position
+    
     if (this.moving && this.target) {
       this.moveToClick();
     }
     
     let frames = this.animations[this.cur_action];
+    
+    imageMode(CENTER);
+ 
     if (frames && frames.length > 0) {
       let currentImage = frames[this.cur_frame % frames.length];
       image(currentImage, this.position.x, this.position.y, currentImage.width * this.scale, currentImage.height * this.scale);
       this.cur_frame++;
     }
+    strokeWeight(6);
+    stroke(255,0,0);
+    point(this.position.x, this.position.y);
+    pop();
+    
   }
   //  keypress
   move( dx, dy){

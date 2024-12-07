@@ -10,7 +10,6 @@ function SnowMan( x , y ){
       fill( 120 , 130 , 150 ); 
       ellipse(this.x + 12, this.y +20 , this.r+5, this.r/2);
       
-      
       stroke(180,200,255);
       fill(230);
       circle(this.x , this.y - 62 , this.r - 20);

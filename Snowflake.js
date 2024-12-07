@@ -47,7 +47,7 @@ function Snowflake( x, y, r ){
       }
       if (this.y >= windowHeight ){
         this.y -= windowHeight;
-        console.log(this.y)
+
       }
      
     }
