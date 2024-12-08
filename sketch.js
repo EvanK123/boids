@@ -1,112 +1,156 @@
-//  json
-var sprite_json
+var sprite_json;
 
-//  imgs
-var bg_img;
-//  song
+// Array of background images
+var bg_img = [];
+// Song
 var song;
-//  text bar
+// Text bar
 var text_bar;
 var currentCharacter = 0;
 
-
 var TenderBud;
 var flock = [];
-var animations = {}
-var num_boids = 7;
+var animations = {};
+var num_boids = 8;
 
-//  snowman 
-var num_snowmen = 3
+// Slider for number of boids
+var boidSlider;
+
+// Snowman
+var num_snowmen = 3;
 var snow_people = [];
-//  snowflake
+// Snowflake
 var num_snowflakes = 1000;
 var snowflakes = [];
 
+// Input fields for maxForce and maxSpeed
+var maxForceInput;
+var maxSpeedInput;
+
 function preload(){
-  bg_img = loadImage("/images/snow-bg.jpg")
-  sprite_json = loadJSON("/Penguins/animationData.json")
+  bg_img = loadImage("/images/snow-bg.jpg");
+  sprite_json = loadJSON("/Penguins/animationData.json");
   song = loadSound('./music/juna.mp3');
 }
 
 function setup() {
   frameRate(23);
-  let x = windowWidth/2;
-  let y = windowHeight /2
+  let x = windowWidth / 2;
+  let y = windowHeight / 2;
 
-  createCanvas(windowWidth, windowHeight );
-  loadAnimations()
+  createCanvas(windowWidth, windowHeight);
+  loadAnimations();
   text_bar = new textBar();
-  TenderBud = new Sprite( sprite_json , x , y , "TenderBud" )
-  for(let i = 0; i < num_boids; i++){
-    flock.push( new Boid( sprite_json ,random(0,windowWidth) , random(0,windowHeight) , "TenderBud"))
+  TenderBud = new Sprite(sprite_json, x, y, "TenderBud");
 
+  // Create the slider for number of boids
+  boidSlider = createSlider(1, 100, num_boids, 1);
+  boidSlider.position(10, 10);
+
+  // Create text inputs for maxForce and maxSpeed
+  maxForceInput = createInput('0.2'); // Default value for maxForce
+  maxForceInput.position(10, 40);
+  maxForceInput.size(50);
+
+  maxSpeedInput = createInput('5'); // Default value for maxSpeed
+  maxSpeedInput.position(10, 70);
+  maxSpeedInput.size(50);
+
+  // Initial flock setup
+  for (let i = 0; i < num_boids; i++) {
+    flock.push(new Boid(sprite_json, random(0, windowWidth), random(0, windowHeight), "TenderBud"));
   }
-  //  snowmen
-  for(let i = 0; i < num_snowmen; i++){
-    let x = random(0,windowWidth)
+
+  // Snowmen
+  for (let i = 0; i < num_snowmen; i++) {
+    let x = random(0, windowWidth);
     let y;
-    let roll = random(0,1)
-    if(roll < .25){
-      y = random(0,windowHeight *.25)
-    }else if(roll<.5){
-      y = random(windowHeight *.25,windowHeight*.5)
-    }else if(roll<.75){
-      y = random(windowHeight*.5,windowHeight*.75)
-    }else{
-      y = random(windowHeight*.75,windowHeight)
+    let roll = random(0, 1);
+    if (roll < 0.25) {
+      y = random(0, windowHeight * 0.25);
+    } else if (roll < 0.5) {
+      y = random(windowHeight * 0.25, windowHeight * 0.5);
+    } else if (roll < 0.75) {
+      y = random(windowHeight * 0.5, windowHeight * 0.75);
+    } else {
+      y = random(windowHeight * 0.75, windowHeight);
     }
-    snow_people.push(new SnowMan(x,y))
+    snow_people.push(new SnowMan(x, y));
   }
 
-  //  snowflakes
-  for(let i = 0; i < num_snowflakes; i++){
-    let x = random(0,windowWidth) 
-    let y = random(-windowHeight,windowHeight)
-    let r = random(3,6)
-    snowflakes[i] = new Snowflake( x , y , r );
+  // Snowflakes
+  for (let i = 0; i < num_snowflakes; i++) {
+    let x = random(0, windowWidth);
+    let y = random(-windowHeight, windowHeight);
+    let r = random(3, 6);
+    snowflakes[i] = new Snowflake(x, y, r);
   }
-
 }
 
 function draw() {
+  background(bg_img);
 
-  background(bg_img); 
-  TenderBud.show()
-  
-  //BOID TIME
+  // Update the number of boids based on the slider value
+  num_boids = boidSlider.value();
+  adjustFlockSize();
+
+  // Update boid maxForce and maxSpeed from the input fields
+  let maxForce = parseFloat(maxForceInput.value());
+  let maxSpeed = parseFloat(maxSpeedInput.value());
+
+  // Apply maxForce and maxSpeed to each boid
   for (let boid of flock) {
-    //  this is cursed they get stuck vvvvvv we should have the snow_people 
-    //  like animated being crushed or something
-    //  boid.checkCollisionWithSnowman(snow_people)
-    boid.edges(); 
-    boid.flock(flock); 
-    boid.update();         
-    boid.show();      
-  }
-  for(let snowman of snow_people){
-    snowman.show()
-  }
-  for(let snowflake of snowflakes){
-    snowflake.show()
-    snowflake.fall()
+    boid.maxForce = maxForce;
+    boid.maxSpeed = maxSpeed;
   }
 
-  
-  // text bar
-  //text_bar.show()
-  //  write the current animation in the text bar
-  //text_bar.animateText(TenderBud.cur_action);
+  TenderBud.show();
+
+  // Boid time
+  for (let boid of flock) {
+    boid.edges();
+    boid.flock(flock);
+    boid.update();
+    boid.show();
+  }
+
+  for (let snowman of snow_people) {
+    snowman.show();
+  }
+  for (let snowflake of snowflakes) {
+    snowflake.show();
+    snowflake.fall();
+  }
+
+  // Display the number of boids below the slider
+  fill(0);
+  textSize(16);
+  text(`Boids: ${num_boids}`, boidSlider.x * 2 + boidSlider.width, 25);
+
+  // Display the current maxForce and maxSpeed values
+  textSize(12);
+  text(`Max Force: ${maxForce}`, maxForceInput.x + maxForceInput.width + 10, 55);
+  text(`Max Speed: ${maxSpeed}`, maxSpeedInput.x + maxSpeedInput.width + 10, 85);
 }
+
+// Function to adjust the flock size based on the slider value
+function adjustFlockSize() {
+  if (flock.length < num_boids) {
+    let newBoids = num_boids - flock.length;
+    for (let i = 0; i < newBoids; i++) {
+      flock.push(new Boid(sprite_json, random(0, windowWidth), random(0, windowHeight), "TenderBud"));
+    }
+  } else if (flock.length > num_boids) {
+    flock.splice(num_boids, flock.length - num_boids);
+  }
+}
+
 function loadAnimations() {
-  //  only tenderbud in this assignment
   for (let character in sprite_json) {
     animations[character] = {};
-    //  the very many animations
     for (let animationName in sprite_json[character]) {
       animations[character][animationName] = [];
       sprite_json[character][animationName].forEach((frameData, index) => {
-        //  /Penguins/TenderBud/{animation}/{frame}
-        //  possibly more sprite for the final?? probs not tho thats so hard
         let imgPath = `/Penguins/${character}/${animationName}/${index}.png`;
         let img = loadImage(imgPath);
         animations[character][animationName].push(img);
@@ -115,50 +159,41 @@ function loadAnimations() {
   }
 }
 
-function resetCurrentCharacter(){
-  //  set curr character to 0 for text bar
+function resetCurrentCharacter() {
   currentCharacter = 0;
 }
+
 function mousePressed() {
-  //  neccesary because music will only play if triggered by an event for some reason
   song.pause();
   TenderBud.moveTowards(mouseX, mouseY);
-  console.log(mouseX)
-  console.log(mouseY)
-  //  neccesary because music will only play if triggered by an event for some reason
   song.play();
 }
 
 function keyPressed() {
-  //  neccesary because music will only play if triggered by an event for some reason
   song.pause();
-  //   * 10 because he moves so slow but i don't want the click move to be too fast
   if (keyIsDown(UP_ARROW)) {
-    TenderBud.changeAction('walk_N'); // Change to walking north animation
-    TenderBud.move(0, -TenderBud.speed * 10); 
+    TenderBud.changeAction('walk_N');
+    TenderBud.move(0, -TenderBud.speed * 10);
   } else if (keyIsDown(DOWN_ARROW)) {
-    TenderBud.changeAction('walk_S'); // Change to walking south animation
+    TenderBud.changeAction('walk_S');
     TenderBud.move(0, TenderBud.speed * 10);
   } else if (keyIsDown(LEFT_ARROW)) {
-    TenderBud.changeAction('walk_W'); // Change to walking west animation
-    TenderBud.move(-TenderBud.speed* 10, 0); 
+    TenderBud.changeAction('walk_W');
+    TenderBud.move(-TenderBud.speed * 10, 0);
   } else if (keyIsDown(RIGHT_ARROW)) {
-    TenderBud.changeAction('walk_E'); // Change to walking east animation
-    TenderBud.move(TenderBud.speed * 10, 0); 
+    TenderBud.changeAction('walk_E');
+    TenderBud.move(TenderBud.speed * 10, 0);
   }
-  //  neccesary because music will only play if triggered by an event for some reason
   song.play();
 }
 
 function keyReleased() {
-  // Reset to idle animation when the key is released
   if (
     key === 'w' || keyCode === UP_ARROW ||
     key === 's' || keyCode === DOWN_ARROW ||
     key === 'a' || keyCode === LEFT_ARROW ||
     key === 'd' || keyCode === RIGHT_ARROW
   ) {
-    // Go back to idle when no key is pressed
-    TenderBud.changeAction('idle'); 
+    TenderBud.changeAction('idle');
   }
 }

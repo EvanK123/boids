@@ -5,12 +5,12 @@ class Sprite {
     this.animations = {};
     this.cur_frame = 0;
     this.cur_action = "idle";
-    this.sprite_data = sprite_data[sprite_name]; 
+    this.sprite_data = sprite_data[sprite_name];
     this.scale = .5;
-    this.speed = 5;
+    this.speed = 8;
     this.pathToAnimation = "/Penguins/" + sprite_name + "/";
     this.target = null;
-    this.moving = false; 
+    this.moving = false;
     this.preloadImages();
   }
 
@@ -31,15 +31,15 @@ class Sprite {
     push()
 
     // If moving, update position
-    
+
     if (this.moving && this.target) {
       this.moveToClick();
     }
-    
+
     let frames = this.animations[this.cur_action];
-    
+
     imageMode(CENTER);
- 
+
     if (frames && frames.length > 0) {
       let currentImage = frames[this.cur_frame % frames.length];
       image(currentImage, this.position.x, this.position.y, currentImage.width * this.scale, currentImage.height * this.scale);
@@ -49,12 +49,12 @@ class Sprite {
     stroke(255,0,0);
     point(this.position.x, this.position.y);
     pop();
-    
+
   }
   //  keypress
   move( dx, dy){
-    this.position.x += dx 
-    this.position.y += dy 
+    this.position.x += dx
+    this.position.y += dy
     console.log(this.position.x)
     console.log(this.position.y)
     this.position.x = constrain(this.position.x, 0, width - this.getWidth());
@@ -118,7 +118,7 @@ class Sprite {
     if (this.target) {
       let direction = createVector(this.target.x - this.position.x, this.target.y - this.position.y);
       let distance = direction.mag();
-      
+
       if (distance > this.speed) {
         direction.normalize();
         // Calculate the new position
@@ -138,7 +138,7 @@ class Sprite {
       }
     }
   }
-  
 
-  
+
+
 }
