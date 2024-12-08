@@ -40,25 +40,35 @@ class Boid {
   updateDirection() {
     let direction = this.velocity.copy();
     if (direction.mag() > 0) {
-      if (abs(direction.x) > abs(direction.y)) {
-        // Horizontal movement
-        if (direction.x > 0) {
-          this.changeAction("walk_E"); // Move right
-        } else {
-          this.changeAction("walk_W"); // Move left
+        let angle = direction.heading(); // Get the angle in radians
+        let degree = angle * (180 / Math.PI); // Convert radians to degrees
+
+        // Normalize the degree to the range of [0, 360)
+        degree = (degree + 360) % 360;
+
+        // Determine the direction based on the angle
+        if (degree >= 337.5 || degree < 22.5) {
+            this.changeAction("walk_E"); // Move right
+        } else if (degree >= 22.5 && degree < 67.5) {
+            this.changeAction("walk_SE"); // Move south-east
+        } else if (degree >= 67.5 && degree < 112.5) {
+            this.changeAction("walk_S"); // Move down
+        } else if (degree >= 112.5 && degree < 157.5) {
+            this.changeAction("walk_SW"); // Move south-west
+        } else if (degree >= 157.5 && degree < 202.5) {
+            this.changeAction("walk_W"); // Move left
+        } else if (degree >= 202.5 && degree < 247.5) {
+            this.changeAction("walk_NW"); // Move north-west
+        } else if (degree >= 247.5 && degree < 292.5) {
+            this.changeAction("walk_N"); // Move up
+        } else if (degree >= 292.5 && degree < 337.5) {
+            this.changeAction("walk_NE"); // Move north-east
         }
-      } else {
-        // Vertical movement
-        if (direction.y > 0) {
-          this.changeAction("walk_S"); // Move down
-        } else {
-          this.changeAction("walk_N"); // Move up
-        }
-      }
     } else {
-      this.changeAction("idle"); // Stop animation if not moving
+        this.changeAction("idle"); // Stop animation if not moving
     }
-  }
+}
+
 
   // Change animation action
   changeAction(next) {
@@ -86,15 +96,14 @@ class Boid {
       );
       this.cur_frame++;
 
-      //  will be used for borderzz
-      this.width = currentImage.width * this.scale
-      this.height = currentImage.height * this.scale
+      // Update the width and height of the boid
+      this.width = currentImage.width * this.scale;
+      this.height = currentImage.height * this.scale;
     }
     strokeWeight(6);
     stroke(255);
     point(this.position.x, this.position.y);
     pop();
-    
   }
 
   // Update position and velocity
@@ -108,15 +117,23 @@ class Boid {
 
   // Keep the boid within screen bounds
   edges() {
-    if (this.position.x > width) {
-      this.position.x = 0;
-    } else if (this.position.x < 0) {
-      this.position.x = width;
+    let halfWidth = this.width / 2;
+    let halfHeight = this.height / 2;
+
+    if (this.position.x + halfWidth > width) {
+      this.position.x = width - halfWidth;
+      this.velocity.x *= -1; // Reflect velocity
+    } else if (this.position.x - halfWidth < 0) {
+      this.position.x = halfWidth;
+      this.velocity.x *= -1; // Reflect velocity
     }
-    if (this.position.y > height) {
-      this.position.y = 0;
-    } else if (this.position.y < 0) {
-      this.position.y = height;
+
+    if (this.position.y + halfHeight > height) {
+      this.position.y = height - halfHeight;
+      this.velocity.y *= -1; // Reflect velocity
+    } else if (this.position.y - halfHeight < 0) {
+      this.position.y = halfHeight;
+      this.velocity.y *= -1; // Reflect velocity
     }
   }
 
@@ -197,16 +214,4 @@ class Boid {
     this.acceleration.add(cohesion);
     this.acceleration.add(separation);
   }
-
-
-  // avoid_player(TenderBud){
-  //   let min_distance = this.width + (this.width /2)
-  //   let cur_distance = dist(this.position.x,this.position.y, TenderBud.x,TenderBud.y)
-
-  //   if(cur_distance <= min_distance){
-
-  //   }
-  // }
-
-  
 }
