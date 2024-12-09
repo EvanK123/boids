@@ -28,7 +28,10 @@ var maxForceInput;
 var maxSpeedInput;
 
 function preload(){
-  bg_img = loadImage("/images/snow-bg.jpg");
+  for (let i = 0; i < 99; i++) {
+    let fileName = nf(i, 2) + ".jpg";  // Format the number with leading zero if necessary
+    bg_img.push(loadImage("/images/" + fileName));
+  }
   sprite_json = loadJSON("/Penguins/animationData.json");
   song = loadSound('./music/juna.mp3');
 }
@@ -87,9 +90,10 @@ function setup() {
   }
 }
 
+let bgIndex = 0;
 function draw() {
-  background(bg_img);
-
+  background(bg_img[bgIndex]);
+  bgIndex = (bgIndex + 1) % bg_img.length
   // Update the number of boids based on the slider value
   num_boids = boidSlider.value();
   adjustFlockSize();
@@ -123,7 +127,7 @@ function draw() {
   }
 
   // Display the number of boids below the slider
-  fill(0);
+  fill(255);
   textSize(16);
   text(`Boids: ${num_boids}`, boidSlider.x * 2 + boidSlider.width, 25);
 
